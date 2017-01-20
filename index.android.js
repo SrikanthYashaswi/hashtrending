@@ -15,7 +15,11 @@ import {
 export default class hashtrending extends Component {
   render() {
     return (
-      <View> <Text>#Trending</Text></View>
+      <View>
+        <Text>
+          #Trending
+        </Text>
+      </View>
     );
   }
 }
