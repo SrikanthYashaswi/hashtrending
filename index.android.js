@@ -15,7 +15,7 @@ import {
 export default class hashtrending extends Component {
   render() {
     return (
-      <View> #Trending</View>
+      <View> <Text>#Trending</Text></View>
     );
   }
 }
