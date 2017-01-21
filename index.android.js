@@ -16,7 +16,18 @@ import {
   ToastAndroid,
   View
 } from 'react-native';
-
+class DetailView extends Component{
+  constructor(arg){
+    super(arg);
+  }
+  render(){
+    const {topic}= this.props;
+    return(<View>
+        <Text style={styles.button} >{topic}</Text>
+      </View>
+    )
+  }
+}
 class FeedView extends Component{
   constructor(arg){
     super(arg);
@@ -113,11 +124,21 @@ class FeedView extends Component{
 export default class hashtrending extends Component {
   constructor(arg){
     super(arg);
+    this.state={
+      selectedTopic:null,
+    }
   }
-
+  updateSelectedOption(topic){
+    this.setState({selectedTopic:topic});
+  }
   render(){
+    const {selectedTopic} = this.state;
     return (
-              <FeedView onSelectTopic={(topic) => this.setState({selectedTopic:topic}) } />
+              (selectedTopic==null)?<FeedView onSelectTopic={(topic) => this.setState({selectedTopic:topic}) } /> :
+              <DetailView
+                  topic={selectedTopic}
+                />
+
           )
   }
 }
