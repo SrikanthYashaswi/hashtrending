@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
@@ -17,6 +11,51 @@ import {
   View
 } from 'react-native';
 let store=[];
+store['data'] = [] ;
+
+class ScrollCardSet extends Component{
+	constructor(){
+		super();
+	}
+	render(){
+		let {dataSource,onCardPressTrigger,refreshControl} = this.props;
+		return (
+			<ScrollView
+				refreshControl={refreshControl}
+				>
+				{dataSource.map( (item,id) =>{
+					return <Card
+							   key={id}
+							   name={item.name}
+							   onCardPressTrigger={onCardPressTrigger}
+							   />
+				} )}
+			</ScrollView>
+		);
+	}
+}
+
+class Card extends Component{
+	constructor(){
+		super();
+	}
+	select(name){
+		let {onCardPressTrigger} = this.props;
+		onCardPressTrigger(name);
+	}
+	render(){
+		let {name} = this.props;
+		return(
+			<TouchableOpacity
+				style={styles.wrapItem}
+				onPress={this.select.bind(this,name)}
+				>
+				<Text style={styles.itemText}>{name}</Text>
+			</TouchableOpacity>
+		);
+	}
+}
+
 class DetailView extends Component{
   constructor(arg){
     super(arg);
@@ -80,7 +119,6 @@ class DetailView extends Component{
 export default class hashtrending extends Component {
   constructor(arg){
     super(arg);
-    store['data']=[];
     this.state={
       access_token:null,
       success:false,
@@ -90,9 +128,10 @@ export default class hashtrending extends Component {
       triggerTrendFunction:true,
       selectedTopic:null,
       cache:null,
+      offsetY:0,
     }
   }
-  async componentWillMount(){
+  async componentDidMount(){
     try{
       let param = {
         method:'POST',
@@ -132,36 +171,31 @@ export default class hashtrending extends Component {
       ToastAndroid.show(`${e.message}`,ToastAndroid.TOP)
     }
   }
+  handler(event){
+    this.setState({offsetY: event.nativeEvent.contentInset.top})
+  }
+  updateSelection(name){
+	  this.setState({selectedTopic:name})
+  }
   renderFeeds(){
     let {triggerTrendFunction} = this.state;
     return(
       <View>
-        <View style={styles.header}>
-          <Text style={styles.title}>#Trending...</Text>
-        </View>
-      <ScrollView
-      refreshControl= {
-          <RefreshControl
-              refreshing={triggerTrendFunction}
-              onRefresh= {() =>{
-                this.setState({triggerTrendFunction:true});
-                this.getTrends();
-              }}
-              progressBackgroundColor='white'
-              colors={['indigo','blue','green','blue']}
-            />
-        }
-    >
-    {
-      this.state.trends.map( (item,k) =>
-      {
-        return <TouchableOpacity key={k} style={styles.wrapItem}><Text  style={styles.itemText}
-          onPress={() => this.setState({selectedTopic:item.name})}
-          >{item.name}</Text></TouchableOpacity>
-      })
-    }
-    </ScrollView>
-
+		<ScrollCardSet
+			dataSource={this.state.trends}
+			refreshControl={
+				<RefreshControl
+					refreshing={triggerTrendFunction}
+					onRefresh={() =>{
+						this.setState({triggerTrendFunction:true});
+						this.getTrends();
+					}}
+					progressBackgroundColor='white'
+					colors={['indigo','blue','green','blue']}
+				/>
+			}
+			onCardPressTrigger={ (name) => {this.updateSelection(name)}}
+		/>
     </View>
   );
   }
@@ -185,7 +219,10 @@ export default class hashtrending extends Component {
       )
     }
     return (
-      <View style={styles.container}>
+      <View >
+        <View style={styles.header}>
+          <Text style={styles.title}>#Trending</Text>
+        </View>
         {
           (selectedTopic == null )? this.renderFeeds() : this.renderDetailView()
         }
